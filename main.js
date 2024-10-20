@@ -30,7 +30,7 @@ const contentArea = document.getElementById('content-area');
 const backToDashboardButton = document.getElementById('back-to-dashboard');
 
 // Event Listeners
-document.getElementById('login-button').addEventListener('click', login);
+// document.getElementById('login-button').addEventListener('click', login);
 signupForm.addEventListener('submit', signup);
 showSignupButton.addEventListener('click', () => {
   loginForm.style.display = 'none';
@@ -55,7 +55,7 @@ backToDashboardButton.addEventListener('click', () => {
 });
 
 // Login function
-async function login() {
+window.login = async function() {
   const email = document.getElementById('login-email').value;
   const password = document.getElementById('login-password').value;
   try {
@@ -65,7 +65,7 @@ async function login() {
       console.error("Error logging in: ", error);
       alert("Login failed: " + error.message);
   }
-}
+};
 
 
 // Signup function
