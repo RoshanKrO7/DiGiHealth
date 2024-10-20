@@ -23,7 +23,7 @@ body {
 }
 
 #app {
-  max-width: 350px;
+  max-width: 1300px;
   width: 100%;
   margin: 0 auto;
   padding: 1rem;
@@ -73,13 +73,23 @@ img {
   opacity: 0;
 }
 
-#login-signup, #health-records {
+#login-signup {
   background-color: rgba(255, 255, 255, 0.22);
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 100%; /* Allow full width on mobile */
+   max-width: 350px; /*Allow full width on mobile */
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+#health-records {
+  background-color: rgba(255, 255, 255, 0.22);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 100%; 
   margin: 0 auto;
   box-sizing: border-box;
 }
@@ -169,6 +179,7 @@ button:hover {
   top: 5rem;
   right: 1rem;
 }
+
 
 /* Form styles */
 .form, .form1 {
@@ -281,5 +292,10 @@ button:hover {
 
   .form label {
     flex: 1 1 100%; /* Full width for form labels */
+  }
+  #logout-button {
+    position: static;
+    margin: 1rem auto;
+    width: 100px; /* Adjust width if needed */
   }
 }

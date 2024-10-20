@@ -168,19 +168,6 @@ function showContent(contentType) {
   contentArea.innerHTML = content;
 }
 
-// Placeholder functions for future implementation
-function createNewJourney() {
-  alert("Create New Journey functionality will be implemented soon.");
-}
-
-function scheduleAppointment() {
-  alert("Schedule Appointment functionality will be implemented soon.");
-}
-
-function updateHealthProfile() {
-  alert("Update Health Profile functionality will be implemented soon.");
-}
-
 // Service Worker Registration
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
