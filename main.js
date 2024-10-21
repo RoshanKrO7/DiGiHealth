@@ -105,11 +105,21 @@ function logout() {
 }
 
 // Auth state change listener
-onAuthStateChanged(auth, user => {
+onAuthStateChanged(auth, async user => {
   if (user) {
     document.getElementById('login-signup').style.display = 'none';
     healthRecords.style.display = 'block';
-    userEmailSpan.textContent = user.email;
+    try {
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        userEmailSpan.textContent = `${userData.firstName} ${userData.lastName}`;
+      } else {
+        console.error("No such document!");
+      }
+    } catch (error) {
+      console.error("Error fetching user document: ", error);
+    }
   } else {
     document.getElementById('login-signup').style.display = 'block';
     healthRecords.style.display = 'none';
