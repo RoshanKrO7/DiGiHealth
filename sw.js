@@ -3,8 +3,7 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/style.css',
-  '/main.js',
-  '/vite.svg'
+  '/main.js'
 ];
 
 self.addEventListener('install', event => {
