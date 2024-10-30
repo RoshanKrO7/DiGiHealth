@@ -72,17 +72,6 @@ window.signup = async function(event) {
 };
 
 
-// Function to log out the user
-function logout() {
-  signOut(auth).then(() => {
-    // Redirect to index.html after successful logout
-    window.location.href = 'index.html';
-  }).catch(error => {
-    console.error("Error signing out: ", error);
-  });
-}
-
-
 // Auth state change listener
 onAuthStateChanged(auth, user => {
   if (user) {
