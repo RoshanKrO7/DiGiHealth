@@ -1,11 +1,15 @@
-const CACHE_NAME = 'digihealth-v1';
+const CACHE_NAME = 'diGiHealth-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/dashboard.html',
   '/style.css',
-  '/script.js',
-  '/favicon_io/android-chrome-192x192.png',
-  '/favicon_io/android-chrome-512x512.png'
+  '/dashboardstyle.css',
+  '/main.js',
+  '/dashboard.js',
+  '/menuHandlers.js',
+  'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap',
+  'https://kit.fontawesome.com/8805295f1b.js'
 ];
 
 // Install Event: Cache resources
@@ -22,13 +26,14 @@ self.addEventListener('install', event => {
 // Activate Event: Remove old caches
 self.addEventListener('activate', event => {
   console.log('[Service Worker] Activate');
+  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
-        cacheNames.map(cache => {
-          if (cache !== CACHE_NAME) {
-            console.log('[Service Worker] Deleting old cache:', cache);
-            return caches.delete(cache);
+        cacheNames.map(cacheName => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('[Service Worker] Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
           }
         })
       );
@@ -41,7 +46,10 @@ self.addEventListener('fetch', event => {
   console.log('[Service Worker] Fetching:', event.request.url);
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
-      return cachedResponse || fetch(event.request).catch(() => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(event.request).catch(() => {
         // Optional: Add a fallback for offline (e.g., /offline.html)
         if (event.request.mode === 'navigate') {
           return caches.match('/index.html'); // Fallback for navigation requests
