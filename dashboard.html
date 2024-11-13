@@ -2,55 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Digital Health Passport</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiGiHealth Dashboard</title>
+    <link rel="icon" type="image/png" href="./favicon_io/favicon-32x32.png" />
+    <link rel="stylesheet" href="./dashboardstyle.css">
+    <link rel="manifest" href="./manifest.json">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"></script>
+    <script type="module" src="dashboard.js" defer></script>
+    <script type="module" src="menuHandlers.js" defer></script>
     <script src="https://kit.fontawesome.com/8805295f1b.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="dashboardstyle.css">
 </head>
 <body>
     <nav id="menu">
+        <div class="logo"><a href="index.html">
+            <img src="./favicon_io/android-chrome-512x512-Photoroom.png" alt="Logo" class="logo">
+        </a></div>
         <div class="menu-item">
             <div class="menu-text">
                 <a href="#">Your Journey</a>
             </div>
             <div class="sub-menu triple">
-                <div class="icon-box">
+                <div class="icon-box" id="health-overview">
                     <div class="icon"><i class="fa fa-hospital-user"></i></div>
                     <div class="text">
                         <div class="title">Health Overview</div>
                         <div class="sub-text">See, add and update your Journey</div>
                     </div>
                 </div>
-                <div class="icon-box">
+                <div class="icon-box" id="medical-history">
                     <div class="icon"><i class="fa fa-timeline"></i></div>
                     <div class="text">
                         <div class="title">Medical History</div>
                         <div class="sub-text">Through your Journey</div>
                     </div>
                 </div>
-                <div class="icon-box">
+                <div class="icon-box" id="chronic-disease-management">
                     <div class="icon"><i class="fa fa-diagnoses"></i></div>
                     <div class="text">
                         <div class="title">Chronic Disease Management</div>
                         <div class="sub-text">Manage your chronic conditions</div>
                     </div>
                 </div>
-                <div class="icon-box">
+                <div class="icon-box" id="vaccination-history">
                     <div class="icon"><i class="fa fa-syringe"></i></div>
                     <div class="text">
                         <div class="title">Vaccination History</div>
                         <div class="sub-text">View and manage vaccinations</div>
                     </div>
                 </div>
-                <div class="icon-box">
+                <div class="icon-box" id="medication-tracker">
                     <div class="icon"><i class="fa fa-pills"></i></div>
                     <div class="text">
                         <div class="title">Medication Tracker</div>
                         <div class="sub-text">Track prescribed medications</div>
                     </div>
                 </div>
-                <div class="icon-box">
+                <div class="icon-box" id="health-analytics">
                     <div class="icon"><i class="fa fa-chart-line"></i></div>
                     <div class="text">
                         <div class="title">Health Analytics</div>
@@ -65,28 +73,28 @@
                 <a href="#">Appointments</a>
             </div>
             <div class="sub-menu double">
-                <div class="icon-box">
+                <div class="icon-box" id="upcoming-appointments">
                     <div class="icon"><i class="fa fa-calendar-check"></i></div>
                     <div class="text">
                         <div class="title">Upcoming Appointments</div>
                         <div class="sub-text">View and manage appointments</div>
                     </div>
                 </div>
-                <div class="icon-box">
+                <div class="icon-box" id="appointment-history">
                     <div class="icon"><i class="fa fa-history"></i></div>
                     <div class="text">
                         <div class="title">Appointment History</div>
                         <div class="sub-text">Check past appointments</div>
                     </div>
                 </div>
-                <div class="icon-box">
+                <div class="icon-box" id="telehealth-consultations">
                     <div class="icon"><i class="fa fa-phone-alt"></i></div>
                     <div class="text">
                         <div class="title">Telehealth Consultations</div>
                         <div class="sub-text">Book virtual appointments</div>
                     </div>
                 </div>
-                <div class="icon-box">
+                <div class="icon-box" id="appointment-reminders">
                     <div class="icon"><i class="fa fa-clock"></i></div>
                     <div class="text">
                         <div class="title">Appointment Reminders</div>
@@ -101,21 +109,21 @@
                 <a href="#">Support</a>
             </div>
             <div class="sub-menu double">
-                <div class="icon-box">
+                <div class="icon-box" id="help-center">
                     <div class="icon"><i class="fa fa-book"></i></div>
                     <div class="text">
                         <div class="title">Help Center</div>
                         <div class="sub-text">FAQs and tutorials</div>
                     </div>
                 </div>
-                <div class="icon-box">
+                <div class="icon-box" id="contact-support">
                     <div class="icon"><i class="fa fa-life-ring"></i></div>
                     <div class="text">
                         <div class="title">Contact Support</div>
                         <div class="sub-text">Reach out to our team</div>
                     </div>
                 </div>
-                <div class="icon-box">
+                <div class="icon-box" id="live-chat">
                     <div class="icon"><i class="fa fa-comment-dots"></i></div>
                     <div class="text">
                         <div class="title">Live Chat</div>
@@ -130,28 +138,28 @@
                 <a href="#">Account</a>
             </div>
             <div class="sub-menu double">
-                <div class="icon-box">
+                <div class="icon-box" id="profile-settings">
                     <div class="icon"><i class="fa fa-user-cog"></i></div>
                     <div class="text">
                         <div class="title">Profile Settings</div>
                         <div class="sub-text">Edit your personal details</div>
                     </div>
                 </div>
-                <div class="icon-box">
+                <div class="icon-box" id="security-settings">
                     <div class="icon"><i class="fa fa-lock"></i></div>
                     <div class="text">
                         <div class="title">Security Settings</div>
                         <div class="sub-text">Manage passwords and 2FA</div>
                     </div>
                 </div>
-                <div class="icon-box">
+                <div class="icon-box" id="data-backup">
                     <div class="icon"><i class="fa fa-download"></i></div>
                     <div class="text">
                         <div class="title">Data Backup & Export</div>
                         <div class="sub-text">Backup and download your data</div>
                     </div>
                 </div>
-                <div class="icon-box" onclick="logout()">
+                <div class="icon-box" id="logout-div">
                     <div class="icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></div>
                     <div class="text">
                         <div class="title">Logout</div>
@@ -159,10 +167,105 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </nav>
-    <div id="user-email"></div>
+        </div>  
+    </nav><br><br>
 
-    <script type="module" src="./dashboard.js"></script>
+    <div class="container">
+        <!-- Welcome Message -->
+        <div class="home-header">
+            <h1>Welcome to Your Digital Health Passport</h1>
+            <p>Your health, managed smarter and more securely.</p>
+            <p class="user-welcome">Hello, <span id="user-name">John Doe</span>. Here's what's happening today.</p>
+        </div>
+
+        <!-- Notification Container -->
+        <div id="notification-container" class="notification-container"></div>
+
+        <!-- Cards Section -->
+        <div class="home-cards">
+            <!-- Card 1 -->
+            <div class="card" id="upcoming-appointments-card">
+                <div class="icon"><i class="fa fa-calendar-check"></i></div>
+                <div class="content">
+                    <h3>Upcoming Appointments</h3>
+                    <p>View and manage your appointments effortlessly.</p>
+                    <a href="#" class="action-link">View Details</a>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="card" id="vaccination-records-card">
+                <div class="icon"><i class="fa fa-syringe"></i></div>
+                <div class="content">
+                    <h3>Vaccination Records</h3>
+                    <p>Track and update your vaccination history.</p>
+                    <a href="#" class="action-link">View Details</a>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="card" id="health-records-card">
+                <div class="icon"><i class="fa fa-file-medical"></i></div>
+                <div class="content">
+                    <h3>Health Records</h3>
+                    <p>Access all your health records in one place.</p>
+                    <a href="#" class="action-link">View Details</a>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="card" id="heart-health-card">
+                <div class="icon"><i class="fa fa-heartbeat"></i></div>
+                <div class="content">
+                    <h3>Heart Health</h3>
+                    <p>Monitor your heart health metrics and reports.</p>
+                    <a href="#" class="action-link">View Details</a>
+                </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="card" id="doctor-consultations-card">
+                <div class="icon"><i class="fa fa-stethoscope"></i></div>
+                <div class="content">
+                    <h3>Doctor Consultations</h3>
+                    <p>Review past doctor consultations and notes.</p>
+                    <a href="#" class="action-link">View Details</a>
+                </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="card" id="medication-history-card">
+                <div class="icon"><i class="fa fa-pills"></i></div>
+                <div class="content">
+                    <h3>Medication History</h3>
+                    <p>Keep track of your medications and prescriptions.</p>
+                    <a href="#" class="action-link">View Details</a>
+                </div>
+            </div>
+
+            <!-- Card 7 -->
+            <div class="card" id="bone-health-card">
+                <div class="icon"><i class="fa fa-bone"></i></div>
+                <div class="content">
+                    <h3>Bone Health</h3>
+                    <p>Monitor your bone health status and treatments.</p>
+                    <a href="#" class="action-link">View Details</a>
+                </div>
+            </div>
+
+            <!-- Card 8 -->
+            <div class="card" id="emergency-contacts-card">
+                <div class="icon"><i class="fa fa-ambulance"></i></div>
+                <div class="content">
+                    <h3>Emergency Contacts</h3>
+                    <p>Update and view your emergency contact details.</p>
+                    <a href="#" class="action-link">View Details</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay Element -->
+    <div class="overlay"></div>
 </body>
 </html>

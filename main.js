@@ -1,102 +1,104 @@
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-auth.js';
-import { getFirestore, doc, setDoc, serverTimestamp, getDoc } from 'https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js';
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB77lnFZqn46ul5U1Q8vTOk44STUhjhcIU",
-  authDomain: "digital-health-passport-16ce0.firebaseapp.com",
-  projectId: "digital-health-passport-16ce0",
-  storageBucket: "digital-health-passport-16ce0.appspot.com",
-  messagingSenderId: "798632054158",
-  appId: "1:798632054158:web:05299092d5281dd45e68df"
-};
+const SUPABASE_URL = 'https://aqdzmfhakqdwquszaqle.supabase.co';
+const SUPABASE_PUBLIC_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxZHptZmhha3Fkd3F1c3phcWxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzE0MDgyNTAsImV4cCI6MjA0Njk4NDI1MH0.4euPXQKyddaJuGhf5Etqdla8LF-h-p-gs1uVxw6dutQ';
+export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLIC_KEY);
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Rest of your main.js content remains the same
+document.addEventListener('DOMContentLoaded', () => {
+  // Check if user is already logged in
+  checkAuthState();
 
-// DOM Elements
-const loginForm = document.getElementById('login-form');
-const signupForm = document.getElementById('signup-form');
-const showSignupButton = document.getElementById('show-signup');
-const showLoginLink = document.getElementById('show-login');
+  // Signup Form Submission
+  const signupForm = document.getElementById('signup-form');
+  signupForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const firstName = signupForm.querySelector('input[name="firstname"]').value;
+    const lastName = signupForm.querySelector('input[name="lastname"]').value;
+    const email = signupForm.querySelector('input[name="email"]').value;
+    const password = signupForm.querySelector('input[name="password"]').value;
 
-// Event Listeners
-showSignupButton.addEventListener('click', () => {
-  loginForm.style.display = 'none';
-  signupForm.style.display = 'block';
-});
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName
+          }
+        }
+      });
 
-showLoginLink.addEventListener('click', (e) => {
-  e.preventDefault();
-  signupForm.style.display = 'none';
-  loginForm.style.display = 'block';
-});
+      if (error) throw error;
 
-// Login function
-window.login = async function() {
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
-  try {
-    await signInWithEmailAndPassword(auth, email, password);
-    window.location.href = 'dashboard.html'; // Redirect to dashboard
-  } catch (error) {
-    console.error("Error logging in: ", error);
-    alert("Login failed: " + error.message);
-  }
-};
+      // Insert user profile data
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([{
+          id: data.user.id,
+          first_name: firstName,
+          last_name: lastName,
+          email: email
+        }]);
 
-// Signup function
-window.signup = async function(event) {
-  event.preventDefault();
-  const firstname = document.querySelector('input[name="firstname"]').value;
-  const lastname = document.querySelector('input[name="lastname"]').value;
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
+      if (profileError) throw profileError;
 
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const userId = userCredential.user.uid;
-    await setDoc(doc(db, 'users', userId), {
-      firstName: firstname,
-      lastName: lastname,
-      email,
-      createdAt: serverTimestamp()
-    });
-    alert("Signup successful! Redirecting to dashboard...");
-    window.location.href = 'dashboard.html'; // Redirect to dashboard
-  } catch (error) {
-    console.error("Error signing up: ", error);
-    alert("Signup failed: " + error.message);
-  }
-};
-
-
-// Function to log out the user
-function logout() {
-  signOut(auth).then(() => {
-    // Redirect to index.html after successful logout
-    window.location.href = 'index.html';
-  }).catch(error => {
-    console.error("Error signing out: ", error);
+      showNotification('Account created successfully!');
+      window.location.href = '/dashboard.html';
+    } catch (error) {
+      console.error('Signup error:', error.message);
+      showNotification(error.message, 'error');
+    }
   });
+
+  // Login Form Submission
+  const loginForm = document.getElementById('login-form');
+  loginForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = loginForm.querySelector('input[name="email"]').value;
+    const password = loginForm.querySelector('input[name="password"]').value;
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      showNotification('Login successful!');
+      window.location.href = './dashboard.html';
+    } catch (error) {
+      console.error('Login error:', error.message);
+      showNotification(error.message, 'error');
+    }
+  });
+});
+
+// Check authentication state
+async function checkAuthState() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session && window.location.pathname === '/index.html') {
+    window.location.href = '/dashboard.html';
+  } else if (!session && window.location.pathname === '/dashboard.html') {
+    window.location.href = '/index.html';
+  }
 }
 
+// Show notification
+function showNotification(message, type = 'info') {
+  const container = document.getElementById('notification-container');
+    if (!container) return;
 
-// Auth state change listener
-onAuthStateChanged(auth, user => {
-  if (user) {
-    // If user is signed in, redirect to dashboard
-    window.location.href = 'dashboard.html';
-  }
-});
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    container.appendChild(notification);
 
-
-// Service Worker Registration
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/DiGiHealth/sw.js')
-      .then(reg => console.log('Service Worker registered', reg))
-      .catch(err => console.error('Service Worker registration failed', err));
-  });
+    setTimeout(() => notification.classList.add('show'), 10);
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => container.removeChild(notification), 500);
+    }, 3000);
 }
