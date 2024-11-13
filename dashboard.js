@@ -128,11 +128,9 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/DiGiHealth/sw.js')
         .then(reg => {
             console.log('Service Worker registered', reg);
-            showNotification('Service Worker registered', 'success');
         })
         .catch(err => {
             console.error('Service Worker registration failed', err);
-            showNotification('Service Worker registration failed', 'error');
         });
 }
 });
