@@ -160,24 +160,6 @@ nav .menu-text a:hover {
     }
 }
 
-.menu-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 99;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.menu-overlay.active {
-    display: block;
-    opacity: 1;
-}
-
 @media (max-width: 768px) {
     .menu-item .sub-menu {
         position: fixed;
@@ -267,149 +249,6 @@ nav .menu-text a:hover {
     }
 }
 
-.upload-form {
-    background: #f8f9fa;
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin: 1rem 0;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.upload-form form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.upload-form input,
-.upload-form textarea,
-.upload-form select {
-    padding: 0.75rem;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-
-.upload-form textarea {
-    min-height: 100px;
-    resize: vertical;
-}
-
-.upload-form input[type="file"] {
-    padding: 0.5rem;
-}
-
-.form-buttons {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.form-buttons button {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.2s;
-}
-
-.form-buttons button[type="submit"] {
-    background: #5d8bff;
-    color: white;
-}
-
-.form-buttons button[type="submit"]:hover {
-    background: #4a70cc;
-}
-
-.form-buttons .cancel {
-    background: #e9ecef;
-    color: #495057;
-}
-
-.form-buttons .cancel:hover {
-    background: #dee2e6;
-}
-
-.action-buttons {
-    margin-bottom: 1.5rem;
-}
-
-.add-button {
-    background: #5d8bff;
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.2s;
-}
-
-.add-button:hover {
-    background: #4a70cc;
-}
-
-.attachments {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #dee2e6;
-}
-
-.attachments h4 {
-    margin: 0 0 0.5rem 0;
-    color: #495057;
-}
-
-.attachments a {
-    display: inline-block;
-    margin-right: 1rem;
-    color: #5d8bff;
-    text-decoration: none;
-}
-
-.attachments a:hover {
-    text-decoration: underline;
-}
-
-.view-certificate {
-    display: inline-block;
-    margin-top: 0.5rem;
-    color: #5d8bff;
-    text-decoration: none;
-}
-
-.view-certificate:hover {
-    text-decoration: underline;
-}
-
-.vaccination,
-.appointment {
-    background: #f8f9fa;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.appointment-type {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    background: #e9ecef;
-    border-radius: 4px;
-    font-size: 0.875rem;
-    color: #495057;
-    margin-top: 0.5rem;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-
 .container {
     padding: 2rem;
     max-width: 1200px;
@@ -451,21 +290,22 @@ nav .menu-text a:hover {
 }
 
 .card {
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: transform 0.3s, box-shadow 0.3s;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    text-align: center;
-    padding: 1.5rem;
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .card .icon {
@@ -526,4 +366,52 @@ nav .menu-text a:hover {
     height: 110px;
     cursor: pointer;
     margin-top: -10px;
+}
+
+.reports-management {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 20px;
+}
+
+.menu-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.menu-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-icon {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    color: #4CAF50;
+}
+
+.card-text {
+    font-size: 1.2em;
+    font-weight: 500;
+    color: #333;
+}
+
+#main-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 20px;
 }

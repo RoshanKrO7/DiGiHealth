@@ -16,33 +16,77 @@ function updateMainContent(title, content) {
 }
 
 export async function handleHealthOverview() {
+    updateMainContent('Reports Management', `
+        <div class="reports-management">
+            <div class="menu-card" id="view-reports">
+                <div class="card-icon"><i class="fa fa-eye"></i></div>
+                <div class="card-text">View Reports</div>
+            </div>
+            <div class="menu-card" id="add-report">
+                <div class="card-icon"><i class="fa fa-plus"></i></div>
+                <div class="card-text">Add New Report</div>
+            </div>
+            <div class="menu-card" id="delete-report">
+                <div class="card-icon"><i class="fa fa-trash"></i></div>
+                <div class="card-text">Delete Report</div>
+            </div>
+            <div class="menu-card" id="update-report">
+                <div class="card-icon"><i class="fa fa-edit"></i></div>
+                <div class="card-text">Update Report</div>
+            </div>
+        </div>
+    `);
+
+    document.getElementById('view-reports').addEventListener('click', viewReports);
+    document.getElementById('add-report').addEventListener('click', addReport);
+    document.getElementById('delete-report').addEventListener('click', deleteReport);
+    document.getElementById('update-report').addEventListener('click', updateReport);
+
+async function viewReports() {
     try {
-        const { data: records, error } = await supabase
-            .from('health_records')
+        const { data: reports, error } = await supabase
+            .from('reports')
             .select('*')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
 
         const content = `
-            <div class="records-grid">
-                ${records?.length ? records.map(record => `
-                    <div class="record-card">
-                        <div class="record-header">
-                            <h3>${record.title}</h3>
-                            <span class="date">${new Date(record.created_at).toLocaleDateString()}</span>
+            <div class="reports-grid">
+                ${reports?.length ? reports.map(report => `
+                    <div class="report-card">
+                        <div class="report-header">
+                            <h3>${report.title}</h3>
+                            <span class="date">${new Date(report.created_at).toLocaleDateString()}</span>
                         </div>
-                        <p>${record.description}</p>
+                        <p>${report.description}</p>
                     </div>
-                `).join('') : '<p class="no-data">No health records found</p>'}
+                `).join('') : '<p class="no-data">No reports found</p>'}
             </div>
         `;
 
-        updateMainContent('Health Overview', content);
+        updateMainContent('View Reports', content);
     } catch (error) {
         console.error('Error:', error);
-        showNotification('Error loading health records', 'error');
+        console.log('Error:', error);
+        showNotification('Error loading reports', 'error');
     }
+}
+
+async function addReport() {
+    // Logic to add a new report
+    showNotification('Add Report functionality not implemented yet', 'info');
+}
+
+async function deleteReport() {
+    // Logic to delete a report
+    showNotification('Delete Report functionality not implemented yet', 'info');
+}
+
+async function updateReport() {
+    // Logic to update a report
+    showNotification('Update Report functionality not implemented yet', 'info');
+}
 }
 
 export async function handleMedicalHistory() {

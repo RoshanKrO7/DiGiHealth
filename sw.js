@@ -8,6 +8,9 @@ const urlsToCache = [
   '/main.js',
   '/dashboard.js',
   '/menuHandlers.js',
+  '/favicon_io/favicon-32x32.png',
+  '/favicon_io/android-chrome-192x192.png',
+  '/favicon_io/android-chrome-512x512.png',
   'https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap',
   'https://kit.fontawesome.com/8805295f1b.js'
 ];
@@ -41,20 +44,11 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch Event: Serve cached files or fetch from network
+// Fetch Event: Serve cached content when offline
 self.addEventListener('fetch', event => {
-  console.log('[Service Worker] Fetching:', event.request.url);
   event.respondWith(
-    caches.match(event.request).then(cachedResponse => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).catch(() => {
-        // Optional: Add a fallback for offline (e.g., /offline.html)
-        if (event.request.mode === 'navigate') {
-          return caches.match('/index.html'); // Fallback for navigation requests
-        }
-      });
+    caches.match(event.request).then(response => {
+      return response || fetch(event.request);
     })
   );
 });
