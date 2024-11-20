@@ -2,13 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DiGiHealth</title>
-  <link rel="icon" type="image/png" href="./favicon_io/favicon-32x32.png" />
-  <link rel="stylesheet" href="./style.css">
-  <link rel="manifest" href="./manifest.json">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  <script type="module" src="main.js" defer></script>
+  <link rel="icon" type="image/png" href="/DiGiHealth/favicon_io/favicon-32x32.png" />
+  <link rel="stylesheet" href="/DiGiHealth/dashboardstyle.css">
+  <link rel="manifest" href="/DiGiHealth/manifest.json">
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"></script>
+  <script type="module" src="/DiGiHealth/main.js" defer></script>
+  <script type="module" src="/DiGiHealth/dashboard.js" defer></script>
+  <script type="module" src="/DiGiHealth/menuHandlers.js" defer></script>
+  <script src="https://kit.fontawesome.com/8805295f1b.js" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div id="app">
@@ -67,12 +71,19 @@
     </div>
   </div>
   
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const loginForm = document.getElementById('login-form');
-      const signupForm = document.getElementById('signup-form');
+  <script type="module">
+    import { supabase, storeCredentials, getStoredCredentials } from './main.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        window.location.href = '/DiGiHealth/dashboard.html';
+      }
+
       const showSignupButton = document.getElementById('show-signup');
       const showLoginLink = document.getElementById('show-login');
+      const loginForm = document.getElementById('login-form');
+      const signupForm = document.getElementById('signup-form');
 
       showSignupButton.addEventListener('click', () => {
         loginForm.style.display = 'none';
@@ -84,16 +95,43 @@
         signupForm.style.display = 'none';
         loginForm.style.display = 'block';
       });
-    });
-    if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then(registration => {
-                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                }).catch(error => {
-                    console.log('ServiceWorker registration failed: ', error);
-                });
-            });
+
+      document.getElementById('login-button').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        if (navigator.onLine) {
+          // Online login
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) {
+            console.error('Login error:', error);
+            alert('Login failed');
+          } else {
+            await storeCredentials(email, password);
+            window.location.href = '/DiGiHealth/dashboard.html';
+          }
+        } else {
+          // Offline login
+          const storedCredentials = await getStoredCredentials(email);
+          if (storedCredentials && storedCredentials.password === password) {
+            window.location.href = '/DiGiHealth/dashboard.html';
+          } else {
+            alert('Invalid credentials or no offline access');
+          }
         }
+      });
+    });
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/DiGiHealth/sw.js').then(registration => {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+        }).catch(error => {
+          console.log('ServiceWorker registration failed: ', error);
+        });
+      });
+    }
   </script>
 </body>
 </html>
