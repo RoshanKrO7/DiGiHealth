@@ -1,6 +1,5 @@
 import { supabase } from './main.js';
 import { showNotification, updateUserName } from './utils.js';
-import * as handlers from './menuHandlers.js';
 
 async function fetchUserProfile() {
     try {
@@ -30,52 +29,37 @@ async function fetchUserProfile() {
 
 function setupMenuListeners() {
     const menuItems = {
-        'health-overview': handlers.handleHealthOverview,
-        'medical-history': handlers.handleMedicalHistory,
-        'chronic-disease-management': handlers.handleChronicDiseaseManagement,
-        'vaccination-history': handlers.handleVaccinationHistory,
-        'medication-tracker': handlers.handleMedicationTracker,
-        'health-analytics': handlers.handleHealthAnalytics,
-        'upcoming-appointments': handlers.handleUpcomingAppointments,
-        'appointment-history': handlers.handleAppointmentHistory,
-        'telehealth-consultations': handlers.handleTelehealthConsultations,
-        'appointment-reminders': handlers.handleAppointmentReminders,
-        'help-center': handlers.handleHelpCenter,
-        'contact-support': handlers.handleContactSupport,
-        'live-chat': handlers.handleLiveChat,
-        'profile-settings': handlers.handleProfileSettings,
-        'security-settings': handlers.handleSecuritySettings,
-        'data-backup': handlers.handleDataBackup
-    };
-    const cardItems = {
-        'upcoming-appointments-card': handlers.handleUpcomingAppointments,
-        'vaccination-records-card': handlers.handleVaccinationHistory,
-        'health-records-card': handlers.handleHealthOverview,
-        'heart-health-card': handlers.handleHealthAnalytics,
-        'doctor-consultations-card': handlers.handleMedicalHistory,
-        'medication-history-card': handlers.handleMedicationTracker,
-        'bone-health-card': handlers.handleChronicDiseaseManagement,
-        'emergency-contacts-card': handlers.handleContactSupport
+        'health-overview': 'view-reports.html',
+        'medical-history': 'medical-history.html',
+        'chronic-disease-management': 'chronic-disease-management.html',
+        'vaccination-history': 'vaccination-history.html',
+        'medication-tracker': 'medication-tracker.html',
+        'upcoming-appointments': 'upcoming-appointments.html',
+        'appointment-history': 'appointment-history.html',
+        'telehealth-consultations': 'telehealth-consultations.html',
+        'appointment-reminders': 'appointment-reminders.html',
+        'help-center': 'help-center.html',
+        'contact-support': 'contact-support.html',
+        'live-chat': 'live-chat.html',
+        'add-report': 'add-report.html',
+        'delete-report': 'delete-report.html',
+        'update-report': 'update-report.html',
+        'upcoming-appointments-card': 'upcoming-appointments.html',
+        'vaccination-records-card': 'vaccination-history.html',
+        'health-records-card': 'medical-history.html',
+        'heart-health-card': 'chronic-disease-management.html',
+        'doctor-consultations-card': 'telehealth-consultations.html',
+        'medication-history-card': 'medication-tracker.html',
+        'bone-health-card': 'chronic-disease-management.html',
+        'emergency-contacts-card' : 'medical-history.html'
     };
 
-    Object.entries(cardItems).forEach(([id, handler]) => {
+    Object.entries(menuItems).forEach(([id, url]) => {
         const element = document.getElementById(id);
         if (element) {
             element.addEventListener('click', (e) => {
                 e.preventDefault();
-                handler();
-                closeAllMenus();
-            });
-        }
-    });
-
-
-    Object.entries(menuItems).forEach(([id, handler]) => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.addEventListener('click', (e) => {
-                e.preventDefault();
-                handler();
+                window.location.href = url;
                 closeAllMenus();
             });
         }
@@ -123,14 +107,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Initialization error:', error);
         showNotification('Error initializing dashboard', 'error');
     }
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/DiGiHealth/sw.js').then(registration => {
-      console.log('ServiceWorker registration successful with scope: ', registration.scope);
-    }).catch(error => {
-      console.log('ServiceWorker registration failed: ', error);
-    });
-  });
-}
 });

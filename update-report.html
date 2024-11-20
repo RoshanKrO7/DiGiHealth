@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Report</title>
+    <link rel="stylesheet" href="dashboardstyle.css">
+</head>
+<body>
+    <nav>
+        <a href="dashboard.html" data-link>Back to Dashboard</a>
+    </nav>
+    <div class="container">
+        <h1>Update Report</h1>
+        <form id="updateReportForm">
+            <input type="text" id="reportId" placeholder="Report ID">
+            <input type="text" id="input1" placeholder="Input 1">
+            <input type="text" id="input2" placeholder="Input 2">
+            <select id="dropdown">
+                <option value="option1">Option 1</option>
+                <option value="option2">Option 2</option>
+            </select>
+            <input type="file" id="fileUpload">
+            <button type="submit">Update</button>
+        </form>
+    </div>
+    <script>
+        document.getElementById('updateReportForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const reportId = document.getElementById('reportId').value;
+            const input1 = document.getElementById('input1').value;
+            const input2 = document.getElementById('input2').value;
+            const dropdown = document.getElementById('dropdown').value;
+            const fileInput = document.getElementById('fileUpload');
+
+            let document_url = null;
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const fileName = `${Date.now()}_${file.name}`;
+
+                try {
+                    console.log('Uploading file:', fileName);
+
+                    // Upload file to Supabase Storage
+                    const { data: uploadData, error: uploadError } = await supabase.storage
+                        .from('DiGiHealth')
+                        .upload(fileName, file);
+
+                    if (uploadError) {
+                        console.error('Upload Error:', uploadError);
+                        throw uploadError;
+                    }
+
+                    console.log('File uploaded successfully:', uploadData);
+                    document_url = uploadData.path;
+                } catch (error) {
+                    console.error('Error uploading file:', error);
+                    alert(`Error uploading file: ${error.message}`);
+                    return;
+                }
+            }
+
+            try {
+                const updateData = {
+                    input1,
+                    input2,
+                    dropdown
+                };
+                if (document_url) {
+                    updateData.document_url = document_url;
+                }
+
+                const { error } = await supabase
+                    .from('healthrecords')
+                    .update(updateData)
+                    .eq('id', reportId);
+
+                if (error) {
+                    console.error('Update Error:', error);
+                    throw error;
+                }
+
+                alert('Report updated successfully!');
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Error: ${error.message}`);
+            }
+        });
+    </script>
+</body>
+</html>

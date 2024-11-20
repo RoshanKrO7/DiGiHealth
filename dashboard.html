@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="./dashboardstyle.css">
     <link rel="manifest" href="./manifest.json">
     <script type="module" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"></script>
+    <script type="module" src="main.js" defer></script>
     <script type="module" src="dashboard.js" defer></script>
     <script type="module" src="menuHandlers.js" defer></script>
     <script src="https://kit.fontawesome.com/8805295f1b.js" crossorigin="anonymous"></script>
@@ -15,12 +16,12 @@
 </head>
 <body>
     <nav id="menu">
-        <div class="logo"><a href="./dashboard.html">
+        <div class="logo"><a href="/dashboard.html" data-link>
             <img src="./favicon_io/android-chrome-512x512-Photoroom.png" alt="Logo" class="logo">
         </a></div>
         <div class="menu-item">
             <div class="menu-text">
-                <a href="#">Your Journey</a>
+                <a href="#" data-link>Your Journey</a>
             </div>
             <div class="sub-menu triple">
                 <div class="icon-box" id="health-overview">
@@ -70,7 +71,7 @@
 
         <div class="menu-item">
             <div class="menu-text">
-                <a href="#">Appointments</a>
+                <a href="#" data-link>Appointments</a>
             </div>
             <div class="sub-menu double">
                 <div class="icon-box" id="upcoming-appointments">
@@ -106,7 +107,7 @@
 
         <div class="menu-item">
             <div class="menu-text">
-                <a href="#">Support</a>
+                <a href="#" data-link>Support</a>
             </div>
             <div class="sub-menu double">
                 <div class="icon-box" id="help-center">
@@ -135,7 +136,7 @@
 
         <div class="menu-item">
             <div class="menu-text">
-                <a href="#">Account</a>
+                <a href="#" data-link>Account</a>
             </div>
             <div class="sub-menu double">
                 <div class="icon-box" id="profile-settings">
@@ -266,8 +267,6 @@
     </div>
 
     <div id="main-content"></div>
-
-    <!-- Overlay Element -->
     <div class="overlay"></div>
 </body>
 </html>

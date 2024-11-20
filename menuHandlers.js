@@ -14,279 +14,132 @@ function updateMainContent(title, content) {
         </div>
     `;
 }
+export function setupMenuListeners() {
+    const menuItems = document.querySelectorAll('.menu-item');
+    const overlay = document.querySelector('.overlay');
+    menuItems.forEach(item => {
+        const handler = item.dataset.handler;
+        if (handler) {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                window[handler]();
+                closeAllMenus();
+            });
+        }
+    });
 
-export async function handleHealthOverview() {
-    updateMainContent('Reports Management', `
-        <div class="reports-management">
-            <div class="menu-card" id="view-reports">
-                <div class="card-icon"><i class="fa fa-eye"></i></div>
-                <div class="card-text">View Reports</div>
-            </div>
-            <div class="menu-card" id="add-report">
-                <div class="card-icon"><i class="fa fa-plus"></i></div>
-                <div class="card-text">Add New Report</div>
-            </div>
-            <div class="menu-card" id="delete-report">
-                <div class="card-icon"><i class="fa fa-trash"></i></div>
-                <div class="card-text">Delete Report</div>
-            </div>
-            <div class="menu-card" id="update-report">
-                <div class="card-icon"><i class="fa fa-edit"></i></div>
-                <div class="card-text">Update Report</div>
-            </div>
-        </div>
-    `);
-
-    document.getElementById('view-reports').addEventListener('click', viewReports);
-    document.getElementById('add-report').addEventListener('click', addReport);
-    document.getElementById('delete-report').addEventListener('click', deleteReport);
-    document.getElementById('update-report').addEventListener('click', updateReport);
-
-async function viewReports() {
-    try {
-        const { data: reports, error } = await supabase
-            .from('reports')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        const content = `
-            <div class="reports-grid">
-                ${reports?.length ? reports.map(report => `
-                    <div class="report-card">
-                        <div class="report-header">
-                            <h3>${report.title}</h3>
-                            <span class="date">${new Date(report.created_at).toLocaleDateString()}</span>
-                        </div>
-                        <p>${report.description}</p>
-                    </div>
-                `).join('') : '<p class="no-data">No reports found</p>'}
-            </div>
-        `;
-
-        updateMainContent('View Reports', content);
-    } catch (error) {
-        console.error('Error:', error);
-        console.log('Error:', error);
-        showNotification('Error loading reports', 'error');
+    overlay?.addEventListener('click', closeAllMenus);
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const healthOverview = document.getElementById('health-overview');
+    if (healthOverview) {
+        healthOverview.addEventListener('click', () => {
+            window.location.href = 'view-reports.html';
+        });
     }
-}
 
-async function addReport() {
-    // Logic to add a new report
-    showNotification('Add Report functionality not implemented yet', 'info');
-}
-
-async function deleteReport() {
-    // Logic to delete a report
-    showNotification('Delete Report functionality not implemented yet', 'info');
-}
-
-async function updateReport() {
-    // Logic to update a report
-    showNotification('Update Report functionality not implemented yet', 'info');
-}
-}
-
-export async function handleMedicalHistory() {
-    try {
-        const { data: history, error } = await supabase
-            .from('medical_history')
-            .select('*')
-            .order('date', { ascending: false });
-
-        if (error) throw error;
-
-        const content = `
-            <div class="history-timeline">
-                ${history?.length ? history.map(record => `
-                    <div class="history-item">
-                        <div class="history-date">
-                            ${new Date(record.date).toLocaleDateString()}
-                        </div>
-                        <div class="history-content">
-                            <h3>${record.condition}</h3>
-                            <p>${record.details}</p>
-                        </div>
-                    </div>
-                `).join('') : '<p class="no-data">No medical history records found</p>'}
-            </div>
-        `;
-
-        updateMainContent('Medical History', content);
-    } catch (error) {
-        console.error('Error:', error);
-        showNotification('Error loading medical history', 'error');
+    const medicalHistory = document.getElementById('medical-history');
+    if (medicalHistory) {
+        medicalHistory.addEventListener('click', () => {
+            window.location.href = 'medical-history.html';
+        });
     }
-}
 
-export function handleChronicDiseaseManagement() {
-    updateMainContent('Chronic Disease Management', `
-        <div class="chronic-disease-management">
-            <div class="management-cards">
-                <div class="management-card">
-                    <h3>Disease Tracking</h3>
-                    <p>Track and monitor your chronic conditions</p>
-                </div>
-                <div class="management-card">
-                    <h3>Medication Schedule</h3>
-                    <p>View and manage your medication schedule</p>
-                </div>
-                <div class="management-card">
-                    <h3>Symptom Journal</h3>
-                    <p>Record and track your symptoms</p>
-                </div>
-            </div>
-        </div>
-    `);
-}
+    const chronicDiseaseManagement = document.getElementById('chronic-disease-management');
+    if (chronicDiseaseManagement) {
+        chronicDiseaseManagement.addEventListener('click', () => {
+            window.location.href = 'chronic-disease-management.html';
+        });
+    }
 
-export function handleVaccinationHistory() {
-    updateMainContent('Vaccination History', `
-        <div class="vaccination-history">
-            <div class="vaccination-cards">
-                <div class="vaccination-card">
-                    <h3>Recent Vaccinations</h3>
-                    <p>View your recent vaccination records</p>
-                </div>
-                <div class="vaccination-card">
-                    <h3>Upcoming Vaccinations</h3>
-                    <p>Check your vaccination schedule</p>
-                </div>
-            </div>
-        </div>
-    `);
-}
+    const vaccinationHistory = document.getElementById('vaccination-history');
+    if (vaccinationHistory) {
+        vaccinationHistory.addEventListener('click', () => {
+            window.location.href = 'vaccination-history.html';
+        });
+    }
 
-export function handleMedicationTracker() {
-    updateMainContent('Medication Tracker', `
-        <div class="medication-tracker">
-            <div class="medication-list">
-                <h3>Current Medications</h3>
-                <p>Track your current medications and schedules</p>
-            </div>
-        </div>
-    `);
-}
+    const medicationTracker = document.getElementById('medication-tracker');
+    if (medicationTracker) {
+        medicationTracker.addEventListener('click', () => {
+            window.location.href = 'medication-tracker.html';
+        });
+    }
 
-export function handleHealthAnalytics() {
-    updateMainContent('Health Analytics', `
-        <div class="health-analytics">
-            <div class="analytics-dashboard">
-                <h3>Health Trends</h3>
-                <p>View your health metrics and trends</p>
-            </div>
-        </div>
-    `);
-}
+    const upcomingAppointments = document.getElementById('upcoming-appointments');
+    if (upcomingAppointments) {
+        upcomingAppointments.addEventListener('click', () => {
+            window.location.href = 'upcoming-appointments.html';
+        });
+    }
 
-export function handleUpcomingAppointments() {
-    updateMainContent('Upcoming Appointments', `
-        <div class="appointments">
-            <div class="appointment-list">
-                <h3>Scheduled Appointments</h3>
-                <p>View and manage your upcoming appointments</p>
-            </div>
-        </div>
-    `);
-}
+    const appointmentHistory = document.getElementById('appointment-history');
+    if (appointmentHistory) {
+        appointmentHistory.addEventListener('click', () => {
+            window.location.href = 'appointment-history.html';
+        });
+    }
 
-export function handleAppointmentHistory() {
-    updateMainContent('Appointment History', `
-        <div class="appointment-history">
-            <div class="history-list">
-                <h3>Past Appointments</h3>
-                <p>Review your previous appointments</p>
-            </div>
-        </div>
-    `);
-}
+    const telehealthConsultations = document.getElementById('telehealth-consultations');
+    if (telehealthConsultations) {
+        telehealthConsultations.addEventListener('click', () => {
+            window.location.href = 'telehealth-consultations.html';
+        });
+    }
 
-export function handleTelehealthConsultations() {
-    updateMainContent('Telehealth Consultations', `
-        <div class="telehealth">
-            <div class="consultation-options">
-                <h3>Virtual Consultations</h3>
-                <p>Schedule and manage your telehealth appointments</p>
-            </div>
-        </div>
-    `);
-}
+    const appointmentReminders = document.getElementById('appointment-reminders');
+    if (appointmentReminders) {
+        appointmentReminders.addEventListener('click', () => {
+            window.location.href = 'appointment-reminders.html';
+        });
+    }
 
-export function handleAppointmentReminders() {
-    updateMainContent('Appointment Reminders', `
-        <div class="reminders">
-            <div class="reminder-settings">
-                <h3>Reminder Preferences</h3>
-                <p>Manage your appointment reminder settings</p>
-            </div>
-        </div>
-    `);
-}
+    const helpCenter = document.getElementById('help-center');
+    if (helpCenter) {
+        helpCenter.addEventListener('click', () => {
+            window.location.href = 'help-center.html';
+        });
+    }
 
-export function handleHelpCenter() {
-    updateMainContent('Help Center', `
-        <div class="help-center">
-            <div class="help-resources">
-                <h3>Support Resources</h3>
-                <p>Access helpful guides and documentation</p>
-            </div>
-        </div>
-    `);
-}
+    const contactSupport = document.getElementById('contact-support');
+    if (contactSupport) {
+        contactSupport.addEventListener('click', () => {
+            window.location.href = 'contact-support.html';
+        });
+    }
 
-export function handleContactSupport() {
-    updateMainContent('Contact Support', `
-        <div class="contact-support">
-            <div class="support-options">
-                <h3>Support Channels</h3>
-                <p>Get in touch with our support team</p>
-            </div>
-        </div>
-    `);
-}
+    const liveChat = document.getElementById('live-chat');
+    if (liveChat) {
+        liveChat.addEventListener('click', () => {
+            window.location.href = 'live-chat.html';
+        });
+    }
 
-export function handleLiveChat() {
-    updateMainContent('Live Chat', `
-        <div class="live-chat">
-            <div class="chat-interface">
-                <h3>Chat Support</h3>
-                <p>Connect with our support team in real-time</p>
-            </div>
-        </div>
-    `);
-}
+    const viewReports = document.getElementById('view-reports');
+    if (viewReports) {
+        viewReports.addEventListener('click', () => {
+            window.location.href = 'view-reports.html';
+        });
+    }
 
-export function handleProfileSettings() {
-    updateMainContent('Profile Settings', `
-        <div class="profile-settings">
-            <div class="settings-form">
-                <h3>Personal Information</h3>
-                <p>Update your profile information</p>
-            </div>
-        </div>
-    `);
-}
+    const addReport = document.getElementById('add-report');
+    if (addReport) {
+        addReport.addEventListener('click', () => {
+            window.location.href = 'add-report.html';
+        });
+    }
 
-export function handleSecuritySettings() {
-    updateMainContent('Security Settings', `
-        <div class="security-settings">
-            <div class="security-options">
-                <h3>Security Preferences</h3>
-                <p>Manage your account security settings</p>
-            </div>
-        </div>
-    `);
-}
+    const deleteReport = document.getElementById('delete-report');
+    if (deleteReport) {
+        deleteReport.addEventListener('click', () => {
+            window.location.href = 'delete-report.html';
+        });
+    }
 
-export function handleDataBackup() {
-    updateMainContent('Data Backup & Export', `
-        <div class="data-backup">
-            <div class="backup-options">
-                <h3>Data Management</h3>
-                <p>Backup and export your health data</p>
-            </div>
-        </div>
-    `);
-}
+    const updateReport = document.getElementById('update-report');
+    if (updateReport) {
+        updateReport.addEventListener('click', () => {
+            window.location.href = 'update-report.html';
+        });
+    }
+});

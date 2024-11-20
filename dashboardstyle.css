@@ -415,3 +415,72 @@ nav .menu-text a:hover {
     flex-direction: column;
     padding: 20px;
 }
+* {
+    box-sizing: border-box; /* Ensures padding and border are included in width/height */
+    margin: 0; /* Resets default margin */
+    padding: 0; /* Resets default padding */
+}
+
+
+
+.form-container {
+    background-color: #ffffff3a; /* White background for the form */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    padding: 20px; /* Padding inside the container */
+    width: 90%; /* Responsive width */
+    max-width: 500px; /* Maximum width for larger screens */
+    margin: 0 auto; /* Center the form container */
+}
+
+h1 {
+    font-size: 24px; /* Font size for the heading */
+    color: #333; /* Dark color for the heading */
+    margin-bottom: 20px; /* Space below heading */
+    text-align: center; /* Center the heading text */
+}
+
+label {
+    display: block; /* Block display for labels */
+    margin-bottom: 5px; /* Space below labels */
+    color: #555; /* Grey color for labels */
+    font-size: 14px; /* Font size for labels */
+}
+
+input[type="text"],
+input[type="number"],
+select,
+input[type="file"] {
+    background-color:#ffffff3a ;
+    width: 100%; /* Full width inputs */
+    padding: 10px; /* Padding inside inputs */
+    border: 1px solid #ccc; /* Light border color */
+    border-radius: 4px; /* Slightly rounded corners */
+    margin-bottom: 15px; /* Space below inputs */
+    font-size: 14px; /* Font size for inputs */
+    transition: border 0.3s; /* Transition for border on focus */
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus,
+input[type="file"]:focus {
+    border-color: #007bff; /* Border color on focus */
+    outline: none; /* Remove default outline */
+}
+
+button {
+    background-color: #007bff; /* Primary button color */
+    color: white; /* Text color for the button */
+    border: none; /* Remove border */
+    border-radius: 4px; /* Rounded corners for button */
+    padding: 10px; /* Padding inside button */
+    font-size: 16px; /* Font size for button */
+    cursor: pointer; /* Pointer cursor on hover */
+    width: 100%; /* Full width button */
+    transition: background-color 0.3s; /* Transition for background color */
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}

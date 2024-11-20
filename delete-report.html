@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Report</title>
+    <link rel="stylesheet" href="dashboardstyle.css">
+</head>
+<body>
+    <nav>
+        <a href="dashboard.html" data-link>Back to Dashboard</a>
+    </nav>
+    <div class="container">
+        <h1>Delete Report</h1>
+        <form id="deleteReportForm">
+            <input type="text" id="reportId" placeholder="Report ID">
+            <button type="submit">Delete</button>
+        </form>
+    </div>
+    <script>
+        document.getElementById('deleteReportForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const reportId = document.getElementById('reportId').value;
+
+            try {
+                const { error } = await supabase
+                    .from('healthrecords')
+                    .delete()
+                    .eq('id', reportId);
+
+                if (error) {
+                    console.error('Delete Error:', error);
+                    throw error;
+                }
+
+                alert('Report deleted successfully!');
+            } catch (error) {
+                console.error('Error:', error);
+                alert(`Error: ${error.message}`);
+            }
+        });
+    </script>
+</body>
+</html>

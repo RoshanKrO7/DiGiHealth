@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Report</title>
+    <link rel="stylesheet" href="dashboardstyle.css">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"></script>
+    <script type="module" src="main.js" defer></script>
+    <script type="module" src="utils.js" defer></script>
+</head>
+<body>
+    <nav>
+        <a href="dashboard.html">Back to Dashboard</a>
+    </nav>
+    <div class="container">
+        <h1>Add New Report</h1>
+        <form id="addReportForm">
+            <input type="text" id="input1" placeholder="Input 1">
+            <input type="text" id="input2" placeholder="Input 2">
+            <select id="dropdown">
+                <option value="option1">Option 1</option>
+                <option value="option2">Option 2</option>
+            </select>
+            <input type="file" id="fileUpload">
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <script type="module">
+        import { supabase } from './main.js';
+        import { showNotification } from './utils.js';
+
+        document.getElementById('addReportForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const input1 = document.getElementById('input1').value;
+            const input2 = document.getElementById('input2').value;
+            const dropdown = document.getElementById('dropdown').value;
+            const fileInput = document.getElementById('fileUpload');
+
+            if (fileInput.files.length === 0) {
+                showNotification('Please upload a document.', 'error');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const fileName = `${Date.now()}_${file.name}`;
+
+            try {
+                console.log('Uploading file:', fileName);
+
+                // Upload file to Supabase Storage
+                const { data: uploadData, error: uploadError } = await supabase.storage
+                    .from('DiGiHealth')
+                    .upload(fileName, file);
+
+                if (uploadError) {
+                    console.error('Upload Error:', uploadError);
+                    throw uploadError;
+                }
+
+                console.log('File uploaded successfully:', uploadData);
+
+                // Save input data to Supabase Database
+                const { error: insertError } = await supabase
+                    .from('healthrecords')
+                    .insert([
+                        {
+                            input1,
+                            input2,
+                            dropdown,
+                            document_url: uploadData.path
+                        }
+                    ]);
+
+                if (insertError) {
+                    console.error('Insert Error:', insertError);
+                    throw insertError;
+                }
+
+                showNotification('Form submitted successfully!');
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification(`Error: ${error.message}`, 'error');
+            }
+        });
+    </script>
+</body>
+</html>
