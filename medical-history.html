@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Reports</title>
+    <title>Medical History</title>
     <link rel="stylesheet" href="dashboardstyle.css">
     <script src="https://kit.fontawesome.com/8805295f1b.js" crossorigin="anonymous"></script>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -52,6 +52,46 @@
         .report-card a:hover {
             background-color: #0056b3;
         }
+
+        .order-buttons {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .order-buttons button {
+            margin: 0 8px;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .order-buttons button:hover {
+            background-color: #0056b3;
+        }
+
+        .search-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .search-bar input {
+            padding: 8px;
+            width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .search-bar input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
     </style>
 </head>
 <body>
@@ -59,25 +99,14 @@
         <a href="dashboard.html">Back to Dashboard</a>
     </nav>
     <div class="container">
-        <h1>View Reports</h1>
-        <input type="text" id="search-bar" placeholder="Search reports...">
-        <div class="reports-management">
-            <div class="menu-card" id="view-reports">
-                <div class="card-icon"><i class="fa fa-eye"></i></div>
-                <div class="card-text">View Reports</div>
-            </div>
-            <div class="menu-card" id="add-report">
-                <div class="card-icon"><i class="fa fa-plus"></i></div>
-                <div class="card-text">Add New Report</div>
-            </div>
-            <div class="menu-card" id="delete-report">
-                <div class="card-icon"><i class="fa fa-trash"></i></div>
-                <div class="card-text">Delete Report</div>
-            </div>
-            <div class="menu-card" id="update-report">
-                <div class="card-icon"><i class="fa fa-edit"></i></div>
-                <div class="card-text">Update Report</div>
-            </div>
+        <h1>Medical History</h1>
+        <div class="search-bar">
+            <input type="text" id="search-bar" placeholder="Search reports...">
+        </div>
+        <div class="order-buttons">
+            <button id="order-year">Order by Year</button>
+            <button id="order-oldest">Oldest to Newest</button>
+            <button id="order-newest">Newest to Oldest</button>
         </div>
         <div class="reports-container" id="reports-container"></div>
     </div>
@@ -117,18 +146,39 @@
                 }
 
                 const reportsContainer = document.getElementById('reports-container');
-                const reportCards = await Promise.all(reports.map(async report => {
-                    const url = await getPublicUrl(report.document_url); // Get public URL
-                    return `
-                        <div class="report-card">
-                            <h3>Disease: ${report.input1}</h3>
-                            <p>Since ${report.input2} Years</p>
-                            <p>Type: ${report.dropdown}</p>
-                            <a href="${url}" target="_blank">View Document</a>
-                        </div>
-                    `;
-                }));
-                reportsContainer.innerHTML = reportCards.join('');
+                let sortedReports = [...reports];
+
+                const renderReports = async (reports) => {
+                    const reportCards = await Promise.all(reports.map(async report => {
+                        const url = await getPublicUrl(report.document_url);
+                        return `
+                            <div class="report-card">
+                                <h3>Disease: ${report.input1}</h3>
+                                <p>Since ${report.input2} Years</p>
+                                <p>Type: ${report.dropdown}</p>
+                                <a href="${url}" target="_blank">View Document</a>
+                            </div>
+                        `;
+                    }));
+                    reportsContainer.innerHTML = reportCards.join('');
+                };
+
+                renderReports(sortedReports);
+
+                document.getElementById('order-year').addEventListener('click', () => {
+                    sortedReports.sort((a, b) => a.input2 - b.input2);
+                    renderReports(sortedReports);
+                });
+
+                document.getElementById('order-oldest').addEventListener('click', () => {
+                    sortedReports.sort((a, b) => a.input2 - b.input2);
+                    renderReports(sortedReports);
+                });
+
+                document.getElementById('order-newest').addEventListener('click', () => {
+                    sortedReports.sort((a, b) => b.input2 - a.input2);
+                    renderReports(sortedReports);
+                });
             } catch (error) {
                 console.error('Error loading reports:', error);
             }

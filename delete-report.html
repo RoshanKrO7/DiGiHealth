@@ -3,42 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete Report</title>
+    <title>Delete Reports</title>
     <link rel="stylesheet" href="dashboardstyle.css">
+    <script src="https://kit.fontawesome.com/8805295f1b.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        .reports-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            padding: 16px;
+        }
+        .report-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .report-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .report-card h3 {
+            margin: 0 0 8px;
+            font-size: 1.25em;
+            color: #333;
+        }
+
+        .report-card p {
+            margin: 4px 0;
+            color: #666;
+        }
+
+        .report-card button {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 8px 16px;
+            background-color: #ff0000;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .report-card button:hover {
+            background-color: #cc0000;
+        }
+    </style>
 </head>
 <body>
     <nav>
-        <a href="dashboard.html" data-link>Back to Dashboard</a>
+        <a href="dashboard.html">Back to Dashboard</a>
     </nav>
     <div class="container">
-        <h1>Delete Report</h1>
-        <form id="deleteReportForm">
-            <input type="text" id="reportId" placeholder="Report ID">
-            <button type="submit">Delete</button>
-        </form>
+        <h1>Delete Reports</h1>
+        <input type="text" id="search-bar" placeholder="Search reports...">
+        <div class="reports-management">
+            <div class="menu-card" id="view-reports">
+                <div class="card-icon"><i class="fa fa-eye"></i></div>
+                <div class="card-text">View Reports</div>
+            </div>
+            <div class="menu-card" id="add-report">
+                <div class="card-icon"><i class="fa fa-plus"></i></div>
+                <div class="card-text">Add New Report</div>
+            </div>
+            <div class="menu-card" id="delete-report">
+                <div class="card-icon"><i class="fa fa-trash"></i></div>
+                <div class="card-text">Delete Report</div>
+            </div>
+            <div class="menu-card" id="update-report">
+                <div class="card-icon"><i class="fa fa-edit"></i></div>
+                <div class="card-text">Update Report</div>
+            </div>
+        </div>
+        <div class="reports-container" id="reports-container"></div>
     </div>
-    <script>
-        document.getElementById('deleteReportForm').addEventListener('submit', async (event) => {
-            event.preventDefault();
+    <script type="module" src="./dashboard.js"></script>
+    <script type="module">
+        import { supabase } from './main.js';
 
-            const reportId = document.getElementById('reportId').value;
-
+        document.addEventListener('DOMContentLoaded', async () => {
             try {
-                const { error } = await supabase
-                    .from('healthrecords')
-                    .delete()
-                    .eq('id', reportId);
-
-                if (error) {
-                    console.error('Delete Error:', error);
-                    throw error;
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+                if (userError) {
+                    console.error('Error fetching user:', userError);
+                    window.location.href = 'index.html';
+                    return;
+                }
+                if (!user) {
+                    window.location.href = 'index.html';
+                    return;
                 }
 
-                alert('Report deleted successfully!');
+                console.log('User:', user);
+
+                const { data: reports, error: reportsError } = await supabase
+                    .from('healthrecords')
+                    .select('*')
+                    .eq('user_id', user.id);
+
+                if (reportsError) {
+                    console.error('Error fetching reports:', reportsError);
+                    return;
+                }
+
+                console.log('Reports:', reports);
+
+                if (reports.length === 0) {
+                    console.log('No reports found for user:', user.id);
+                }
+
+                const reportsContainer = document.getElementById('reports-container');
+                const reportCards = reports.map(report => `
+                    <div class="report-card" data-document-url="${report.document_url}" data-record-id="${report.id}">
+                        <h3>Disease: ${report.input1}</h3>
+                        <p>Since ${report.input2} Years</p>
+                        <p>Type: ${report.dropdown}</p>
+                        <button class="delete-button">Delete Document</button>
+                    </div>
+                `);
+                reportsContainer.innerHTML = reportCards.join('');
+
+                // Add event listeners to delete buttons
+                const deleteButtons = document.querySelectorAll('.delete-button');
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', async (event) => {
+                        const reportCard = event.target.closest('.report-card');
+                        const documentUrl = reportCard.getAttribute('data-document-url');
+                        const recordId = reportCard.getAttribute('data-record-id');
+                        await deleteDocument(documentUrl, recordId);
+                        reportCard.remove();
+                    });
+                });
             } catch (error) {
-                console.error('Error:', error);
-                alert(`Error: ${error.message}`);
+                console.error('Error loading reports:', error);
             }
+        });
+
+        // Function to delete the document
+        async function deleteDocument(documentUrl, recordId) {
+            if (!documentUrl) {
+                console.error('Document URL is empty or undefined');
+                return;
+            }
+
+            console.log('Attempting to delete document:', documentUrl);
+
+            const { error: deleteError } = await supabase.storage
+                .from('DiGiHealth')  // Replace with your bucket name
+                .remove([documentUrl]); // This is used to delete the file
+
+            if (deleteError) {
+                console.error('Error deleting document:', deleteError.message);
+                return;
+            }
+
+            console.log('Document deleted successfully:', documentUrl);
+
+            // Delete the record from the database
+            const { error: recordError } = await supabase
+                .from('healthrecords')
+                .delete()
+                .eq('id', recordId);
+
+            if (recordError) {
+                console.error('Error deleting record:', recordError.message);
+                return;
+            }
+
+            console.log('Record deleted successfully:', recordId);
+        }
+
+        document.getElementById('search-bar').addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            const reports = document.querySelectorAll('.report-card');
+            reports.forEach(report => {
+                const title = report.querySelector('h3').textContent.toLowerCase();
+                if (title.includes(query)) {
+                    report.style.display = '';
+                } else {
+                    report.style.display = 'none';
+                }
+            });
         });
     </script>
 </body>

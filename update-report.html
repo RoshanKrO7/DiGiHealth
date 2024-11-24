@@ -8,22 +8,34 @@
 </head>
 <body>
     <nav>
-        <a href="dashboard.html" data-link>Back to Dashboard</a>
+        <a href="dashboard.html">Back to Dashboard</a>
     </nav>
     <div class="container">
         <h1>Update Report</h1>
         <form id="updateReportForm">
-            <input type="text" id="reportId" placeholder="Report ID">
-            <input type="text" id="input1" placeholder="Input 1">
-            <input type="text" id="input2" placeholder="Input 2">
-            <select id="dropdown">
-                <option value="option1">Option 1</option>
-                <option value="option2">Option 2</option>
-            </select>
-            <input type="file" id="fileUpload">
+            <label>
+                <input type="text" id="reportId" placeholder="Report ID">
+            </label>
+            <label>
+                <input type="text" id="input1" placeholder="Input 1">
+            </label>
+            <label>
+                <input type="text" id="input2" placeholder="Input 2">
+            </label>
+            <label>
+                <select id="dropdown">
+                    <option value="">Select an option</option>
+                    <option value="option1">Option 1</option>
+                    <option value="option2">Option 2</option>
+                </select>
+            </label>
+            <label>
+                <input type="file" id="fileUpload">
+            </label>
             <button type="submit">Update</button>
         </form>
     </div>
+    <script type="module" src="dashboard.js" defer></script>
     <script>
         document.getElementById('updateReportForm').addEventListener('submit', async (event) => {
             event.preventDefault();

@@ -41,6 +41,7 @@ function setupMenuListeners() {
         'help-center': 'help-center.html',
         'contact-support': 'contact-support.html',
         'live-chat': 'live-chat.html',
+        'view-reports':'view-reports.html',
         'add-report': 'add-report.html',
         'delete-report': 'delete-report.html',
         'update-report': 'update-report.html',
