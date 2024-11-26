@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medication Tracker</title>
+    <link rel="stylesheet" href="dashboardstyle.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            margin: 2rem 0;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 2rem;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-row > div {
+            flex: 1;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        button {
+            padding: 0.75rem;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .medication-list {
+            margin-top: 2rem;
+        }
+
+        .medication-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+
+        .medication-card h3 {
+            margin: 0 0 8px;
+            font-size: 1.25em;
+            color: #333;
+        }
+
+        .medication-card p {
+            margin: 4px 0;
+            color: #666;
+        }
+
+        .medication-card button {
+            margin-top: 8px;
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .medication-card button:hover {
+            background-color: #0056b3;
+        }
+
+        .medication-card .delete-btn {
+            background-color: #dc3545;
+        }
+
+        .medication-card .delete-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="dashboard.html">Back to Dashboard</a>
+    </nav>
+    <div class="container">
+        <h1>Medication Tracker</h1>
+        <form id="addMedicationForm">
+            <label>
+                Medication Name
+                <input type="text" id="medication-name" placeholder="Medication Name" required>
+            </label>
+            <div class="form-row">
+                <div>
+                    <label>
+                        Dosage (e.g., 500mg, 1 tablet)
+                        <input type="text" id="dosage" placeholder="Dosage" required>
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        Frequency
+                        <select id="frequency" required>
+                            <option value="">Select Frequency</option>
+                            <option value="Once a day">Once a day</option>
+                            <option value="Twice a day">Twice a day</option>
+                            <option value="Three times a day">Three times a day</option>
+                            <option value="Every other day">Every other day</option>
+                            <option value="Weekly">Weekly</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+            <div class="form-row">
+                <div>
+                    <label>
+                        Start Date
+                        <input type="date" id="start-date" required>
+                    </label>
+                </div>
+                <div>
+                    <label>
+                        End Date
+                        <input type="date" id="end-date">
+                    </label>
+                </div>
+            </div>
+            <label>
+                Notes
+                <textarea id="notes" placeholder="Additional Notes"></textarea>
+            </label>
+            <button type="submit">Add Medication</button>
+        </form>
+        <div class="medication-list" id="medication-list"></div>
+    </div>
+    <script type="module">
+        import { supabase } from './main.js';
+
+        document.getElementById('addMedicationForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const medicationName = document.getElementById('medication-name').value;
+            const dosage = document.getElementById('dosage').value;
+            const frequency = document.getElementById('frequency').value;
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            const notes = document.getElementById('notes').value;
+            const medicationId = document.getElementById('addMedicationForm').dataset.id;
+
+            try {
+                // Get user data
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+                if (userError) {
+                    console.error('Error fetching user:', userError);
+                    throw userError;
+                }
+
+                if (medicationId) {
+                    // Update existing medication
+                    const { error: updateError } = await supabase
+                        .from('medications')
+                        .update({
+                            medication_name: medicationName,
+                            dosage,
+                            frequency,
+                            start_date: startDate,
+                            end_date: endDate,
+                            notes
+                        })
+                        .eq('id', medicationId)
+                        .eq('user_id', user.id);
+
+                    if (updateError) {
+                        console.error('Update Error:', updateError);
+                        throw updateError;
+                    }
+                } else {
+                    // Insert new medication
+                    const { error: insertError } = await supabase
+                        .from('medications')
+                        .insert([
+                            {
+                                medication_name: medicationName,
+                                dosage,
+                                frequency,
+                                start_date: startDate,
+                                end_date: endDate,
+                                notes,
+                                user_id: user.id
+                            }
+                        ]);
+
+                    if (insertError) {
+                        console.error('Insert Error:', insertError);
+                        throw insertError;
+                    }
+                }
+
+                // Clear form and dataset id
+                document.getElementById('addMedicationForm').reset();
+                delete document.getElementById('addMedicationForm').dataset.id;
+
+                // Fetch and display medications after adding/updating
+                fetchMedications();
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        // Fetch medications from Supabase
+        async function fetchMedications() {
+            try {
+                const { data: { user }, error: userError } = await supabase.auth.getUser();
+                if (userError) {
+                    console.error('Error fetching user:', userError);
+                    throw userError;
+                }
+
+                const { data: medications, error } = await supabase
+                    .from('medications')
+                    .select('*')
+                    .eq('user_id', user.id);
+
+                if (error) {
+                    console.error('Error fetching medications:', error);
+                    throw error;
+                }
+
+                displayMedications(medications);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // Display medications
+        function displayMedications(medications) {
+            const medicationList = document.getElementById('medication-list');
+            medicationList.innerHTML = medications.map(medication => `
+                <div class="medication-card" data-id="${medication.id}">
+                    <h3>${medication.medication_name}</h3>
+                    <p>Dosage: ${medication.dosage}</p>
+                    <p>Frequency: ${medication.frequency}</p>
+                    <p>Start Date: ${new Date(medication.start_date).toLocaleDateString()}</p>
+                    <p>End Date: ${medication.end_date ? new Date(medication.end_date).toLocaleDateString() : 'Ongoing'}</p>
+                    <p>Notes: ${medication.notes}</p>
+                    <button class="edit-btn" data-id="${medication.id}">Edit</button>
+                    <button class="delete-btn" data-id="${medication.id}">Delete</button>
+                </div>
+            `).join('');
+        }
+
+        // Handle the delete functionality
+        document.addEventListener('click', async (event) => {
+            if (event.target.classList.contains('delete-btn')) {
+                const medicationId = event.target.getAttribute('data-id');
+                try {
+                    const { error } = await supabase
+                        .from('medications')
+                        .delete()
+                        .eq('id', medicationId);
+
+                    if (error) {
+                        console.error('Error deleting medication:', error);
+                        throw error;
+                    }
+
+                    // Fetch and display medications after deletion
+                    fetchMedications();
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+
+            // Handle the edit functionality
+            if (event.target.classList.contains('edit-btn')) {
+                const medicationId = event.target.getAttribute('data-id');
+                const medication = medications.find(m => m.id === medicationId);
+                if (medication) {
+                    document.getElementById('medication-name').value = medication.medication_name;
+                    document.getElementById('dosage').value = medication.dosage;
+                    document.getElementById('frequency').value = medication.frequency;
+                    document.getElementById('start-date').value = medication.start_date;
+                    document.getElementById('end-date').value = medication.end_date;
+                    document.getElementById('notes').value = medication.notes;
+                    document.getElementById('addMedicationForm').dataset.id = medication.id;
+                }
+            }
+        });
+
+        // Initial call to load medications
+        fetchMedications();
+    </script>
+</body>
+</html>
