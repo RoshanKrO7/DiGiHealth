@@ -1,0 +1,20 @@
+{
+    "name": "digihealth",
+    "version": "1.0.0",
+    "description": "A health management app using Google Vision API",
+    "main": "server.js",
+    "scripts": {
+      "start": "node server.js",
+      "build": "npm install"
+    },
+    "dependencies": {
+      "express": "^4.17.1",
+      "@google-cloud/vision": "^3.0.0"
+    },
+    "devDependencies": {
+      "nodemon": "^2.0.22"
+    },
+    "author": "Roshan",
+    "license": "MIT"
+  }
+  
