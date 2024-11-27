@@ -113,12 +113,10 @@
             <label>
                 Name of Disease<span>*</span>
                 <input type="text" id="input1" placeholder="Name" required>
-                
             </label>
             <label>
-                Since(in Years)<span>*</span>
+                Since (in Years)<span>*</span>
                 <input type="text" id="input2" placeholder="Since" required>
-                
             </label>
             <label>
                 Select an option<span>*</span>
@@ -127,12 +125,10 @@
                     <option value="option1">Chronic</option>
                     <option value="option2">Non-Chronic</option>
                 </select>
-                
             </label>
             <label>
                 Upload Document<span>*</span>
                 <input type="file" id="fileUpload" required>
-                
             </label>
             <button type="submit">Submit</button>
         </form>
@@ -180,28 +176,28 @@
                     throw userError;
                 }
 
-                // Save input data to Supabase Database
-                const { error: insertError } = await supabase
-                    .from('healthrecords')
-                    .insert([
-                        {
-                            input1,
-                            input2,
-                            dropdown,
-                            document_url: uploadData.path,
-                            user_id: user.id,
-                            first_name: user.user_metadata.first_name,
-                            last_name: user.user_metadata.last_name,
-                            email: user.email
-                        }
-                    ]);
+                // Send data to the backend for processing
+                const response = await fetch('http://localhost:3000/api/analyze', { // Ensure the URL matches your backend server
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: user.id,
+                        disease_name: input1,
+                        since: input2,
+                        disease_type: dropdown,
+                        document_url: uploadData.path
+                    })
+                });
 
-                if (insertError) {
-                    console.error('Insert Error:', insertError);
-                    throw insertError;
+                const result = await response.json();
+
+                if (result.success) {
+                    showNotification('Form submitted and processed successfully!');
+                } else {
+                    showNotification('Error processing report', 'error');
                 }
-
-                showNotification('Form submitted successfully!');
             } catch (error) {
                 console.error('Error:', error);
                 showNotification(`Error: ${error.message}`, 'error');
