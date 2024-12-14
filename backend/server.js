@@ -9,7 +9,6 @@ const { createClient } = require('@supabase/supabase-js');
 const client = new vision.ImageAnnotatorClient({
     keyFilename: path.join(__dirname, 'config/digihealth-442908-828dc2a2a506.json'), // Path to the JSON key file
 });
-GOOGLE_APPLICATION_CREDENTIALS='./config/digihealth-442908-828dc2a2a506.json'
 
 // Initialize Supabase client
 const supabaseUrl = 'https://your-supabase-url.supabase.co';
