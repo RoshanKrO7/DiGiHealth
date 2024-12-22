@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Contacts</title>
+    <link rel="stylesheet" href="dashboardstyle.css">
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"></script>
+    <script type="module" src="main.js" defer></script>
+    <script type="module" src="utils.js" defer></script>
+    <script type="module" src="auth.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            margin: 2rem 0;
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 2rem;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="email"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        input[type="text"]:focus,
+        input[type="tel"]:focus,
+        input[type="email"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        button {
+            padding: 0.75rem;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .qr-code {
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background-color: #007bff;
+            color: #fff;
+            padding: 1rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .notification.error {
+            background-color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="dashboard.html">Back to Dashboard</a>
+    </nav>
+    <div class="container">
+        <h1>Emergency Contacts</h1>
+        <form id="emergencyContactForm">
+            <label>
+                Patient Name<span>*</span>
+                <input type="text" id="patientName" placeholder="Patient Name" required>
+            </label>
+            <label>
+                Blood Group<span>*</span>
+                <input type="text" id="bloodGroup" placeholder="Blood Group" required>
+            </label>
+            <label>
+                Allergies<span>*</span>
+                <input type="text" id="allergies" placeholder="Allergies" required>
+            </label>
+            <label>
+                Emergency Contact Number<span>*</span>
+                <input type="tel" id="emergencyNumber" placeholder="Emergency Contact Number" required>
+            </label>
+            <label>
+                Current Medication<span>*</span>
+                <input type="text" id="currentMedication" placeholder="Current Medication" required>
+            </label>
+            <label>
+                Diseases Suffering From<span>*</span>
+                <input type="text" id="diseases" placeholder="Diseases Suffering From" required>
+            </label>
+            <button type="submit">Submit</button>
+        </form>
+        <div class="qr-code" id="qrCode"></div>
+        <button id="downloadQR" style="display: none;">Download QR Code</button>
+        <div class="notification" id="notification"></div>
+    </div>
+    <script type="module">
+        import { supabase } from './main.js';
+        import { showNotification } from './utils.js';
+        import { getUser } from './auth.js';
+
+        document.getElementById('emergencyContactForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const patientName = document.getElementById('patientName').value;
+            const bloodGroup = document.getElementById('bloodGroup').value;
+            const allergies = document.getElementById('allergies').value;
+            const emergencyNumber = document.getElementById('emergencyNumber').value;
+            const currentMedication = document.getElementById('currentMedication').value;
+            const diseases = document.getElementById('diseases').value;
+
+            try {
+                // Get the logged-in user's details
+                const user = await getUser();
+
+                if (!user || !user.user_metadata) {
+                    console.error('User metadata is missing');
+                    throw new Error('User metadata is missing');
+                }
+
+                const { id: user_id } = user;
+
+                // Check if a QR code already exists for the user
+                const { data: existingData, error: fetchError } = await supabase
+                    .from('emergency_contacts')
+                    .select('qr_code_url')
+                    .eq('user_id', user_id)
+                    .single();
+
+                if (fetchError && fetchError.code !== 'PGRST116') {
+                    console.error('Fetch Error:', fetchError);
+                    throw fetchError;
+                }
+
+                // Generate QR code with the contact information
+                const qrCodeData = JSON.stringify({
+                    patientName,
+                    bloodGroup,
+                    allergies,
+                    emergencyNumber,
+                    currentMedication,
+                    diseases
+                });
+
+                const qrCodeContainer = document.getElementById('qrCode');
+                qrCodeContainer.innerHTML = '';
+                const canvas = document.createElement('canvas');
+                qrCodeContainer.appendChild(canvas);
+                QRCode.toCanvas(canvas, qrCodeData, {
+                    width: 128,
+                    height: 128
+                }, async (error) => {
+                    if (error) {
+                        console.error('QR Code Error:', error);
+                        return;
+                    }
+
+                    // Notify about the image generation
+                    showNotification('QR code generated successfully!');
+
+                    // Convert canvas to data URL
+                    const qrImage = canvas.toDataURL('image/png');
+
+                    // Save the QR code image to Supabase Storage
+                    const fileName = `${user_id}_${Date.now()}.png`;
+                    const { data: uploadData, error: uploadError } = await supabase.storage
+                        .from('DiGiHealth')
+                        .upload(fileName, qrImage.split(',')[1], { contentType: 'image/png', upsert: true });
+
+                    if (uploadError) {
+                        console.error('Upload Error:', uploadError);
+                        throw uploadError;
+                    }
+
+                    // If a previous QR code exists, delete it from storage
+                    if (existingData && existingData.qr_code_url) {
+                        await supabase.storage.from('DiGiHealth').remove([existingData.qr_code_url]);
+                    }
+
+                    // Save the QR code image URL to the database
+                    const qrCodeUrl = supabase.storage.from('DiGiHealth').getPublicUrl(uploadData.Key).publicURL;
+                    const { error: updateError } = await supabase
+                        .from('emergency_contacts')
+                        .upsert({
+                            user_id,
+                            patient_name: patientName,
+                            blood_group: bloodGroup,
+                            allergies,
+                            emergency_number: emergencyNumber,
+                            current_medication: currentMedication,
+                            diseases,
+                            qr_code_url: qrCodeUrl
+                        }, { onConflict: ['user_id'] });
+
+                    if (updateError) {
+                        console.error('Update Error:', updateError);
+                        throw updateError;
+                    }
+
+                    // Show the download button
+                    const downloadButton = document.getElementById('downloadQR');
+                    downloadButton.style.display = 'block';
+
+                    // Add event listener to download the QR code
+                    downloadButton.addEventListener('click', () => {
+                        const link = document.createElement('a');
+                        link.href = qrImage;
+                        link.download = 'emergency_contact_qr.png';
+                        link.click();
+                    });
+
+                    showNotification('Emergency contact saved and QR code generated successfully!');
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                showNotification(`Error: ${error.message}`, 'error');
+            }
+        });
+    </script>
+</body>
+</html>

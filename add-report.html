@@ -8,6 +8,7 @@
     <script type="module" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"></script>
     <script type="module" src="main.js" defer></script>
     <script type="module" src="utils.js" defer></script>
+    <script type="module" src="auth.js" defer></script>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -113,34 +114,39 @@
             <label>
                 Name of Disease<span>*</span>
                 <input type="text" id="input1" placeholder="Name" required>
-                
             </label>
             <label>
-                Since(in Years)<span>*</span>
+                Since (in Years)<span>*</span>
                 <input type="text" id="input2" placeholder="Since" required>
-                
             </label>
             <label>
                 Select an option<span>*</span>
                 <select id="dropdown" required>
                     <option value="">Disease Type</option>
-                    <option value="option1">Chronic</option>
-                    <option value="option2">Non-Chronic</option>
+                    <option value="Chronic">Chronic</option>
+                    <option value="Non-Chronic">Non-Chronic</option>
                 </select>
-                
             </label>
             <label>
                 Upload Document<span>*</span>
                 <input type="file" id="fileUpload" required>
-                
             </label>
             <button type="submit">Submit</button>
         </form>
+        <div class="notification" id="notification"></div>
     </div>
-    <div class="notification" id="notification"></div>
     <script type="module">
         import { supabase } from './main.js';
         import { showNotification } from './utils.js';
+        import { getUser } from './auth.js';
+
+        async function hashFile(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
 
         document.getElementById('addReportForm').addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -156,9 +162,28 @@
             }
 
             const file = fileInput.files[0];
-            const fileName = `${Date.now()}_${file.name}`;
+            const fileHash = await hashFile(file);
 
             try {
+                console.log('Checking for duplicate file with hash:', fileHash);
+
+                // Check if the file already exists in the database
+                const { data: existingFiles, error: checkError } = await supabase
+                    .from('documents')
+                    .select('id')
+                    .eq('file_hash', fileHash);
+
+                if (checkError) {
+                    console.error('Check Error:', checkError);
+                    throw checkError;
+                }
+
+                if (existingFiles.length > 0) {
+                    showNotification('This document already exists in the system.', 'error');
+                    return;
+                }
+
+                const fileName = `${Date.now()}_${file.name}`;
                 console.log('Uploading file:', fileName);
 
                 // Upload file to Supabase Storage
@@ -173,35 +198,75 @@
 
                 console.log('File uploaded successfully:', uploadData);
 
-                // Get user data
-                const { data: { user }, error: userError } = await supabase.auth.getUser();
-                if (userError) {
-                    console.error('Error fetching user:', userError);
-                    throw userError;
+                // Get the logged-in user's details
+                const user = await getUser();
+
+                if (!user || !user.user_metadata) {
+                    console.error('User metadata is missing');
+                    throw new Error('User metadata is missing');
                 }
 
-                // Save input data to Supabase Database
-                const { error: insertError } = await supabase
-                    .from('healthrecords')
-                    .insert([
-                        {
-                            input1,
-                            input2,
-                            dropdown,
-                            document_url: uploadData.path,
-                            user_id: user.id,
-                            first_name: user.user_metadata.first_name,
-                            last_name: user.user_metadata.last_name,
-                            email: user.email
-                        }
-                    ]);
+                const { id: user_id, user_metadata: { first_name, last_name, email } } = user;
 
-                if (insertError) {
-                    console.error('Insert Error:', insertError);
-                    throw insertError;
+                // Send data to the backend for processing
+                const response = await fetch('http://localhost:5000/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        file_path: uploadData.path,
+                        user_id: user_id,
+                        disease_name: input1,
+                        document_url: uploadData.path
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Save input data along with user details and file hash to Supabase Database
+                    const { error: insertError1 } = await supabase
+                        .from('healthrecords')
+                        .insert([
+                            {
+                                user_id,
+                                first_name,
+                                last_name,
+                                email,
+                                disease_name: input1,
+                                since: input2,
+                                disease_type: dropdown,
+                                document_url: uploadData.path
+                            }
+                        ]);
+
+                    if (insertError1) {
+                        console.error('Insert Error:', insertError1);
+                        throw insertError1;
+                    }
+
+                    // Save extracted text to another table
+                    const { error: insertError2 } = await supabase
+                        .from('documents')
+                        .insert([
+                            {
+                                disease_name: input1,
+                                document_url: uploadData.path,
+                                extracted_text: result.extracted_text,
+                                file_hash: fileHash
+                            }
+                        ]);
+
+                    if (insertError2) {
+                        console.error('Insert Error:', insertError2);
+                        throw insertError2;
+                    }
+
+                    showNotification('Form submitted and processed successfully!');
+                } else {
+                    showNotification('Error processing report', 'error');
                 }
-
-                showNotification('Form submitted successfully!');
             } catch (error) {
                 console.error('Error:', error);
                 showNotification(`Error: ${error.message}`, 'error');

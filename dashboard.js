@@ -1,5 +1,6 @@
 import { supabase } from './main.js';
 import { showNotification, updateUserName } from './utils.js';
+import { getUser } from './auth.js';
 
 async function fetchUserProfile() {
     try {
@@ -52,7 +53,7 @@ function setupMenuListeners() {
         'doctor-consultations-card': 'telehealth-consultations.html',
         'medication-history-card': 'medication-tracker.html',
         'bone-health-card': 'chronic-disease-management.html',
-        'emergency-contacts-card' : 'medical-history.html'
+        'emergency-contacts-card' : 'emergency-contacts.html'  // Added menu item
     };
 
     Object.entries(menuItems).forEach(([id, url]) => {
@@ -61,11 +62,40 @@ function setupMenuListeners() {
             element.addEventListener('click', (e) => {
                 e.preventDefault();
                 window.location.href = url;
-                closeAllMenus();
             });
         }
     });
 }
+
+// Function to load the QR code on the dashboard
+async function loadQRCode() {
+    const user = await getUser();
+    if (!user || !user.user_metadata) {
+        console.error('User metadata is missing');
+        return;
+    }
+
+    const { id: user_id } = user;
+
+    const { data, error } = await supabase
+        .from('emergency_contacts')
+        .select('qr_code_url')
+        .eq('user_id', user_id)
+        .single();
+
+    if (error) {
+        console.error('Error fetching QR code URL:', error);
+        return;
+    }
+
+    if (data && data.qr_code_url) {
+        const qrCodeContainer = document.getElementById('qrCodeCard');
+        qrCodeContainer.innerHTML = `<img src="${data.qr_code_url}" alt="QR Code" />`;
+    }
+}
+
+// Call the function to load the QR code when the dashboard loads
+document.addEventListener('DOMContentLoaded', loadQRCode);
 
 function setupLogoutListener() {
     const logoutDiv = document.getElementById('logout-div');

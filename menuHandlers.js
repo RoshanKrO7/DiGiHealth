@@ -1,19 +1,4 @@
-import { supabase } from './auth.js';
-import { showNotification } from './utils.js';
 
-function updateMainContent(title, content) {
-    const container = document.querySelector('.container');
-    if (!container) return;
-
-    container.innerHTML = `
-        <div class="home-header">
-            <h1>${title}</h1>
-        </div>
-        <div class="content-wrapper">
-            ${content}
-        </div>
-    `;
-}
 export function setupMenuListeners() {
     const menuItems = document.querySelectorAll('.menu-item');
     const overlay = document.querySelector('.overlay');
