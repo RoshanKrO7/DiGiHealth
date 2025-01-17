@@ -142,6 +142,7 @@
         <button id="downloadQR" style="display: none;">Download QR Code</button>
         <div class="notification" id="notification"></div>
     </div>
+
     <script type="module">
         import { supabase } from './main.js';
         import { showNotification } from './utils.js';
@@ -158,29 +159,15 @@
             const diseases = document.getElementById('diseases').value;
 
             try {
-                // Get the logged-in user's details
                 const user = await getUser();
-
                 if (!user || !user.user_metadata) {
-                    console.error('User metadata is missing');
                     throw new Error('User metadata is missing');
                 }
 
                 const { id: user_id } = user;
+                const fileName = `${user_id}.png`;  // Use a consistent file name based on user ID
 
-                // Check if a QR code already exists for the user
-                const { data: existingData, error: fetchError } = await supabase
-                    .from('emergency_contacts')
-                    .select('qr_code_url')
-                    .eq('user_id', user_id)
-                    .single();
-
-                if (fetchError && fetchError.code !== 'PGRST116') {
-                    console.error('Fetch Error:', fetchError);
-                    throw fetchError;
-                }
-
-                // Generate QR code with the contact information
+                // Generate QR code data
                 const qrCodeData = JSON.stringify({
                     patientName,
                     bloodGroup,
@@ -194,39 +181,58 @@
                 qrCodeContainer.innerHTML = '';
                 const canvas = document.createElement('canvas');
                 qrCodeContainer.appendChild(canvas);
-                QRCode.toCanvas(canvas, qrCodeData, {
-                    width: 128,
-                    height: 128
-                }, async (error) => {
+
+                QRCode.toCanvas(canvas, qrCodeData, { width: 128, height: 128 }, async (error) => {
                     if (error) {
-                        console.error('QR Code Error:', error);
-                        return;
+                        throw new Error('QR Code generation failed');
                     }
 
-                    // Notify about the image generation
-                    showNotification('QR code generated successfully!');
+                    const qrImage = canvas.toDataURL('image/png').split(',')[1]; // Extract Base64 part
 
-                    // Convert canvas to data URL
-                    const qrImage = canvas.toDataURL('image/png');
-
-                    // Save the QR code image to Supabase Storage
-                    const fileName = `${user_id}_${Date.now()}.png`;
-                    const { data: uploadData, error: uploadError } = await supabase.storage
+                    // Delete old QR code (if exists)
+                    const { data: existingFiles, error: listError } = await supabase.storage
                         .from('DiGiHealth')
-                        .upload(fileName, qrImage.split(',')[1], { contentType: 'image/png', upsert: true });
+                        .list('', { search: fileName });
+
+                    if (listError) {
+                        console.error('Error checking existing files:', listError);
+                        throw listError;
+                    }
+
+                    if (existingFiles && existingFiles.length > 0) {
+                        const { error: deleteError } = await supabase.storage
+                            .from('DiGiHealth')
+                            .remove([fileName]);
+
+                        if (deleteError) {
+                            console.error('Error deleting old QR code:', deleteError);
+                            throw deleteError;
+                        }
+                    }
+
+                    // Upload the new QR code
+                    const { error: uploadError } = await supabase.storage
+                        .from('DiGiHealth')
+                        .upload(fileName, qrImage, { contentType: 'image/png', upsert: true });
 
                     if (uploadError) {
-                        console.error('Upload Error:', uploadError);
-                        throw uploadError;
+                        throw new Error('QR code upload failed');
                     }
 
-                    // If a previous QR code exists, delete it from storage
-                    if (existingData && existingData.qr_code_url) {
-                        await supabase.storage.from('DiGiHealth').remove([existingData.qr_code_url]);
+                    // Get public URL of the uploaded QR code
+                    const { data: publicUrlData, error: publicUrlError } = supabase
+                        .storage
+                        .from('DiGiHealth')
+                        .getPublicUrl(fileName);
+
+                    if (publicUrlError) {
+                        throw new Error('Failed to retrieve public URL');
                     }
 
-                    // Save the QR code image URL to the database
-                    const qrCodeUrl = supabase.storage.from('DiGiHealth').getPublicUrl(uploadData.Key).publicURL;
+                    const qrCodeUrl = publicUrlData.publicUrl;
+                    console.log('QR Code Public URL:', qrCodeUrl);
+
+                    // Save emergency contact details and QR code URL in database
                     const { error: updateError } = await supabase
                         .from('emergency_contacts')
                         .upsert({
@@ -241,18 +247,15 @@
                         }, { onConflict: ['user_id'] });
 
                     if (updateError) {
-                        console.error('Update Error:', updateError);
-                        throw updateError;
+                        throw new Error('Database update failed');
                     }
-
-                    // Show the download button
+                    
+                    // Show download button
                     const downloadButton = document.getElementById('downloadQR');
                     downloadButton.style.display = 'block';
-
-                    // Add event listener to download the QR code
                     downloadButton.addEventListener('click', () => {
                         const link = document.createElement('a');
-                        link.href = qrImage;
+                        link.href = canvas.toDataURL('image/png');
                         link.download = 'emergency_contact_qr.png';
                         link.click();
                     });
